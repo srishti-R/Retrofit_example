@@ -1,30 +1,20 @@
 package com.android.example.retrofit_example;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.DatePickerDialog;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.squareup.picasso.Picasso;
 
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.time.Year;
 import java.util.Calendar;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,13 +27,14 @@ String Api_key="BM2lQ99gjhQqkujoOBBeFdD26LXgtg5y9lXR5dKW";
 TextView textView;
 TextView textViewex;
 ImageView imageView;
+    TextView tv;
 String dateQuery;
 DatePicker datePicker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        tv = findViewById(R.id.today);
         textView=findViewById(R.id.title);
         textViewex=findViewById(R.id.explain);
         imageView=findViewById(R.id.image_view);
@@ -130,7 +121,7 @@ DatePicker datePicker;
             int mDay = dayOfMonth;
 
             String formattedDay = (String.valueOf(mDay));
-            String formattedMonth = (String.valueOf(mMonth));
+            String formattedMonth = (String.valueOf(mMonth + 1));
 
             if(mDay < 10)
             {
@@ -144,7 +135,7 @@ DatePicker datePicker;
 
 
           dateQuery=new StringBuilder().append(mYear).append("-").append(formattedMonth).append("-").append(formattedDay).toString();
-
+            tv.setText(dateQuery);
             queryRetrofit(dateQuery);
 
         }
@@ -162,12 +153,16 @@ DatePicker datePicker;
             @Override
             public void onResponse(Call<Picture> call, Response<Picture> response) {
                 if(!response.isSuccessful()){
-                    textViewex.setText(response.code());
+                    textViewex.setText("response could not be received");
                 }
                 Picture picture1=response.body();
-                textView.setText(picture1.getTitle());
-                textViewex.setText(picture1.getBody());
-                Picasso.get().load(Uri.parse(picture1.getImageUrl().toString())).into(imageView);
+                if (picture1 != null) {
+                    textView.setText(picture1.getTitle());
+                    textViewex.setText(picture1.getBody());
+                    Picasso.get().load(Uri.parse(picture1.getImageUrl().toString())).into(imageView);
+                } else {
+                    textViewex.setText("No resource added yet.");
+                }
                 // imageView.setBackgroundResource(picture1.getImageUrl());
                 // new DownloadImage(imageView).execute(picture1.getImageUrl().toString());
 
@@ -176,6 +171,8 @@ DatePicker datePicker;
             @Override
             public void onFailure(Call<Picture> call, Throwable t) {
                 textViewex.setText(t.getMessage());
+
+
             }
         });
 
